@@ -33,8 +33,8 @@ it exists from Phase 1), collisions lab (Phase 3 stretch), all of Modules B–F,
 
 | Phase | Content | Exit criterion |
 |-------|---------|----------------|
-| 1 Foundation | Scaffold frontend + backend, design system, experiment catalog, docs, CI | Both apps build, lint, type-check, and their tests pass |
-| 2 Physics engine | Vectors, Euler / semi-implicit Euler / Verlet / RK4, fixed-step simulation loop, event location, ring buffers, SciPy reference solvers + golden fixtures | Convergence-order tests pass; frame-rate-independence test passes; TS matches SciPy fixtures |
+| 1 Foundation ✅ | Scaffold frontend + backend, design system, experiment catalog, docs, CI | Both apps build, lint, type-check, and their tests pass |
+| 2 Physics engine ✅ | Vectors, Euler / semi-implicit Euler / Verlet / RK4, fixed-step simulation loop, event location, ring buffers, SciPy reference solvers + golden fixtures | Convergence-order tests pass; frame-rate-independence test passes; TS matches SciPy fixtures |
 | 3 First experiments | Projectile, pendulum, Newton's laws (collisions as stretch) | Each experiment's analytic tests pass; parameters drive the model |
 | 4 Visualization | Canvas renderer with world↔screen camera, vectors, free-body diagrams, uPlot live graphs, CSV export | Graphs plot recorded data; CSV round-trip test |
 | — **MVP release** | Phases 1–4 + README | Definition of Done checklist all verified |

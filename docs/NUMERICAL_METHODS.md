@@ -1,9 +1,9 @@
 # Numerical Methods
 
-Status: **design document (Phase 1)**. No integrator code exists yet; this file
-records which method each experiment will use and *why*, so that Phase 2–3
-implementations can be checked against an explicit plan. Each section will be
-updated with measured error figures once the code and tests exist.
+Status: **Phase 2 — integrators, event location and reference solvers are
+implemented and tested** (`frontend/src/physics/core/`,
+`backend/app/physics/`). Experiment-specific sections (§2–§6) describe the
+methods the Phase 3+ experiments will use. Measured figures are in §8.
 
 All internal quantities are **SI units** (m, kg, s, rad, N, J, C, K). Display
 units are a presentation concern only.
@@ -250,3 +250,50 @@ Each numerical test documents why its tolerance is what it is. Three tiers:
 
 Tolerances are never widened to make a failing test pass without recording the
 reason in the test itself.
+
+---
+
+## 8. Measured results (Phase 2)
+
+All figures are produced by the automated tests and can be reproduced with
+`pnpm test` (frontend) and `uv run pytest` (backend).
+
+**Reference solvers** (SciPy DOP853, rtol = atol = 1e-12), validated against
+analytic solutions to 1e-9 or better: linear damped pendulum, exact nonlinear
+period (elliptic integral) at θ₀ = 0.05, 1.0, 2.5 and 3.0 rad, vertical fall
+with quadratic drag (tanh solution), drag-free range and flight time.
+
+**Observed convergence order** on the damped nonlinear pendulum
+(θ₀ = 2.5 rad, γ = 0.2 s⁻¹, T = 5 s) matches theory within ±0.15 for all four
+integrators: Euler 1, semi-implicit Euler 1, velocity Verlet 2, RK4 4.
+Velocity Verlet remains second order with this velocity-dependent damping force,
+but is not symplectic in that case.
+
+**Exact discrete identities** on the harmonic oscillator (ωh = 0.1), verified
+to round-off:
+
+| Method | Identity |
+|---|---|
+| Explicit Euler | energy × (1 + ω²h²) every step (grows) |
+| RK4 | energy × \|R(iωh)\|² every step (decays very slowly) |
+| Semi-implicit Euler | conserves v² + ω²q² − hω²qv exactly |
+| Velocity Verlet | conserves v² + ω²q²(1 − ω²h²/4) exactly |
+
+**Accuracy against the SciPy fixtures** (RK4, dt = 1 ms):
+
+| Problem | Max error | Tolerance |
+|---|---|---|
+| Damped nonlinear pendulum, 10 s | 3.9 × 10⁻¹¹ | 10⁻⁹ |
+| Projectile with quadratic drag, to landing | 2.4 × 10⁻¹⁰ | 10⁻⁸ |
+| Landing time (event location) | 9.7 × 10⁻¹³ s | 10⁻⁹ s |
+| Landing range | 1.6 × 10⁻¹¹ m | 10⁻⁸ m |
+
+**Frame-rate independence:** the same 3.0004 s run split into 30 Hz,
+144 Hz and randomly jittered frames gives the same step count and
+bit-identical state.
+
+### Golden fixtures
+
+`backend/scripts/generate_fixtures.py` writes the reference trajectories to
+`frontend/src/physics/__fixtures__/`. A backend test fails if the committed
+files no longer match the generator, so the two sides cannot silently diverge.

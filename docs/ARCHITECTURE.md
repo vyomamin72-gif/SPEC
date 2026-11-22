@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **Phase 1 (foundation)**. Sections marked _(planned)_ describe design
+Status: **Phase 2 (physics engine) complete**. Sections marked _(planned)_ describe design
 decisions that are fixed now but whose code lands in a later phase.
 
 ## 1. Guiding principle
@@ -16,7 +16,7 @@ The backend exists for two things that genuinely belong on a server:
 1. **Persistence** – saved experiments, user presets, later learning progress.
 2. **Reference computation** – high-accuracy SciPy solutions (`solve_ivp`,
    DOP853, `rtol=1e-12`) used to produce *golden fixtures* that validate the
-   TypeScript engine in automated tests. _(planned, Phase 2)_
+   TypeScript engine in automated tests.
 
 Analogy: the browser is the lab bench where experiments happen; the backend is
 the filing cabinet and the calibration lab. You don't walk to the calibration
@@ -28,12 +28,15 @@ lab every time you take a reading.
 SPEC/
 ├── frontend/                 React + TypeScript + Vite application
 │   ├── src/
-│   │   ├── physics/          Pure TS physics engine. No React, no DOM.   (Phase 2)
+│   │   ├── physics/          Pure TS physics engine. No React, no DOM.
+│   │   │   ├── core/         Integrators, fixed-step loop, event location
+│   │   │   ├── analysis/     Analytic reference functions (elliptic K, …)
+│   │   │   └── __fixtures__/ SciPy golden trajectories (generated)
 │   │   ├── simulations/      One folder per experiment: model binding,
 │   │   │                     parameter schema, renderer, educational text. (Phase 3)
 │   │   ├── rendering/        Canvas helpers: world↔screen transform, arrows. (Phase 4)
 │   │   ├── charts/           uPlot wrapper for live graphs.               (Phase 4)
-│   │   ├── data/             Ring buffers, sampling, CSV export.          (Phase 4)
+│   │   ├── data/             Ring buffers, sim-time sampling. CSV export in Phase 4.
 │   │   ├── components/
 │   │   │   ├── ui/           Design-system primitives
 │   │   │   └── layout/       App shell, workspace three-panel layout
@@ -49,7 +52,8 @@ SPEC/
 │   │   ├── models/           SQLAlchemy ORM models
 │   │   ├── schemas/          Pydantic request/response schemas
 │   │   ├── services/         Database operations (business logic)
-│   │   └── physics/          SciPy reference solvers                     (Phase 2)
+│   │   └── physics/          SciPy reference solvers and fixture builder
+│   └── scripts/              generate_fixtures.py
 │   └── tests/                Pytest suite
 └── docs/                     Architecture, numerical methods, roadmap, design system
 ```
@@ -74,10 +78,9 @@ The brief requires six concerns to be separated. This is how each maps to code:
 
 Dependency direction is one-way: `components → simulations → physics`.
 `physics/` must never import from React, the DOM, or Zustand. This is enforced
-by convention now and will be enforced by an ESLint `no-restricted-imports`
-rule when the folder is created in Phase 2.
+by an ESLint `no-restricted-imports` rule on `src/physics/**` and `src/data/**`.
 
-## 4. Simulation loop _(planned, Phase 2)_
+## 4. Simulation loop (`physics/core/loop.ts`)
 
 Fixed-timestep accumulator ("Fix Your Timestep" pattern):
 
@@ -127,7 +130,7 @@ interacting bodies), where the cost is real. The engine API is designed as
 "state in, state out" so that moving a model into a worker requires no change
 to the model itself.
 
-## 5. Data collection and graphs _(planned, Phase 4)_
+## 5. Data collection (`data/`, Phase 2) and graphs (Phase 4)
 
 - Each recorded channel is a fixed-capacity ring buffer (`Float64Array`).
   Memory is bounded regardless of run length; the oldest samples are dropped.

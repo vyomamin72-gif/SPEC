@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.165.0",
+    "numpy>=2.5.5",
     "pydantic>=2.14.4",
     "pydantic-settings>=2.16.3",
+    "scipy>=1.18.1",
     "sqlalchemy>=2.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
@@ -33,8 +35,14 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+# Mathematical notation in physics docstrings is intentional.
+allowed-confusables = ["−", "γ", "ρ", "θ", "ω"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["scipy", "scipy.*"]
+ignore_missing_imports = true

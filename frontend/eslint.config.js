@@ -13,4 +13,22 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
+  {
+    // The physics engine and data layer must stay independent of the UI so
+    // they can be tested in plain Node and moved into Web Workers unchanged.
+    files: ['src/physics/**/*.ts', 'src/data/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react-*', 'react/*', 'zustand', '@/components/**', '@/pages/**', '@/hooks/**', '@/stores/**'],
+              message: 'physics/ and data/ must not depend on React or UI code.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 )

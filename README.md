@@ -4,9 +4,10 @@ An interactive physics simulation platform. Every simulation will be driven by
 numerical integration of its equations of motion, not by animation formulas,
 and every result is compared against theory where theory exists.
 
-> **Status: Phase 1 (foundation) complete. No simulation is runnable yet.**
-> The app currently has a dashboard that lists all 25 planned experiments and
-> their models, plus a working persistence API. The physics engine is Phase 2.
+> **Status: Phase 2 (physics engine) complete. No experiment is runnable in the UI yet.**
+> The tested engine (integrators, fixed-step loop, event location, data
+> recording, SciPy reference fixtures) exists; the first experiments that use
+> it are Phase 3.
 > See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Documentation
@@ -24,7 +25,7 @@ and every result is compared against theory where theory exists.
   React Router, react-resizable-panels. Planned: Zustand, uPlot, Three.js —
   each added in the phase that first uses it.
 - **Backend:** Python 3.12+, FastAPI, SQLAlchemy 2, Pydantic 2, SQLite
-  (portable to PostgreSQL). Planned: NumPy and SciPy (Phase 2).
+  (portable to PostgreSQL), NumPy and SciPy for reference solutions.
 - **Tests:** Vitest + Testing Library, Pytest, Playwright.
 
 ## Prerequisites
@@ -68,6 +69,12 @@ cd backend
 uv run ruff check . && uv run mypy app tests && uv run pytest
 ```
 
+Regenerate the SciPy golden fixtures after changing a reference problem:
+
+```bash
+cd backend && uv run python scripts/generate_fixtures.py
+```
+
 The same checks run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## API (Phase 1)
@@ -83,7 +90,7 @@ The same checks run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Known limitations (current)
 
-- No simulations yet. Every experiment is labelled "Planned".
+- No experiment UI yet. Every experiment is labelled "Planned".
 - Tables are created with `create_all`. Alembic migrations must be added
   before the first schema change once real data exists.
 - There is no authentication. Do not expose the backend publicly.
