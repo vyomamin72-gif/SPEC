@@ -35,10 +35,11 @@ export function AppShell() {
     <div className="flex min-h-dvh flex-col">
       <header className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-line bg-base px-4">
         <Link to="/" className="flex items-center gap-2.5 font-semibold tracking-tight text-ink hover:text-accent-strong">
-          <img src="/favicon.svg" alt="" className="size-6" />
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-6" />
           Physics Laboratory
         </Link>
-        <BackendIndicator />
+        {/* The static build has no server to report on. */}
+        {import.meta.env.VITE_STATIC_DEMO !== 'true' && <BackendIndicator />}
       </header>
       <main className="flex min-h-0 flex-1 flex-col">
         <Outlet />
