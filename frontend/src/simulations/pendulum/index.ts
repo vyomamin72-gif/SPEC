@@ -1,6 +1,6 @@
 import { INTEGRATOR_INFO } from '@/physics/core/integrators'
 import type { IntegratorName } from '@/physics/core/integrators'
-import { dampedLinearPeriod, exactPeriod, PendulumModel, smallAnglePeriod } from '@/physics/models/pendulum'
+import { dampedLinearPeriod, exactPeriod, linearSolution, PendulumModel, smallAnglePeriod } from '@/physics/models/pendulum'
 import type { PendulumParams } from '@/physics/models/pendulum'
 import { clear, drawArrow, drawDisc, drawLabel } from '@/rendering/draw'
 import { fitViewport } from '@/rendering/viewport'
@@ -40,6 +40,17 @@ function createInstance(values: ParameterValues): SimulationInstance {
     },
     finished: false,
     step: (dt) => model.step(dt),
+    sample() {
+      const deg = 180 / Math.PI
+      return [
+        model.state[0] * deg,
+        linearSolution(model.time, amplitude, p.gravity / p.length, gamma) * deg,
+        model.state[1],
+        model.kineticEnergy(),
+        model.potentialEnergy(),
+        model.totalEnergy(),
+      ]
+    },
     readouts() {
       const [theta, omega] = model.state
       const energy = model.totalEnergy()
@@ -145,6 +156,23 @@ function createInstance(values: ParameterValues): SimulationInstance {
 export const pendulumSimulation: SimulationDefinition = {
   id: 'pendulum',
   dt: 1e-3,
+  sampleInterval: () => 0.01,
+  channels: [
+    { key: 'theta', label: 'θ', unit: '°' },
+    { key: 'thetaLinear', label: 'θ, small-angle exact solution', unit: '°' },
+    { key: 'omega', label: 'ω', unit: 'rad/s' },
+    { key: 'ke', label: 'Kinetic energy', unit: 'J' },
+    { key: 'pe', label: 'Potential energy', unit: 'J' },
+    { key: 'energy', label: 'Total energy', unit: 'J' },
+  ],
+  charts: [
+    { id: 'angle', title: 'Angle', unit: '°', series: [{ key: 'theta', color: 'position' }, { key: 'thetaLinear', color: 'theory', theory: true }] },
+    { id: 'omega', title: 'Angular velocity', unit: 'rad/s', series: [{ key: 'omega', color: 'velocity' }] },
+    {
+      id: 'energy', title: 'Energy', unit: 'J',
+      series: [{ key: 'ke', color: 'velocity' }, { key: 'pe', color: 'position' }, { key: 'energy', color: 'energy' }],
+    },
+  ],
   canvasDescription: 'A pendulum swinging from a fixed support, with its velocity vector and the release amplitude dashed.',
   parameters: [
     { kind: 'number', key: 'length', label: 'Length L', unit: 'm', min: 0.1, max: 10, step: 0.05, defaultValue: 1 },

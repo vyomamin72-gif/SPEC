@@ -1,8 +1,10 @@
+import { toCsv } from '@/data/csv'
+import { TimeSeriesRecorder } from '@/data/TimeSeriesRecorder'
 import { FixedStepLoop } from '@/physics/core/loop'
 import { readPalette } from '@/rendering/palette'
 import type { Palette } from '@/rendering/palette'
 import { defaultValues } from './types'
-import type { ParameterValue, ParameterValues, ReadoutGroup, SimulationDefinition, SimulationInstance } from './types'
+import type { ChartSpec, ParameterValue, ParameterValues, ReadoutGroup, SimulationDefinition, SimulationInstance } from './types'
 
 export interface ControllerSnapshot {
   values: ParameterValues
@@ -13,9 +15,18 @@ export interface ControllerSnapshot {
   fellBehind: boolean
   readouts: ReadoutGroup[]
   notices: string[]
+  /** Changes whenever recorded data changes; charts redraw on change. */
+  dataVersion: number
+  sampleCount: number
+  recordingPaused: boolean
 }
 
 const PUBLISH_INTERVAL_MS = 100
+/** Samples kept per channel; older samples are dropped (bounded memory). */
+export const SAMPLE_CAPACITY = 5000
+
+/** uPlot's data layout: x values, then one array per series; null marks a gap. */
+export type ChartData = [number[], ...(number | null)[][]]
 
 /**
  * Runs one experiment outside React: owns the simulation instance, the
@@ -40,6 +51,8 @@ export class SimulationController {
   private palette: Palette | null = null
   private listeners = new Set<() => void>()
   private snapshot!: ControllerSnapshot
+  private recorder!: TimeSeriesRecorder<string>
+  private recordingPaused = false
 
   constructor(definition: SimulationDefinition, values: ParameterValues = defaultValues(definition)) {
     this.definition = definition
@@ -117,6 +130,34 @@ export class SimulationController {
     this.rebuild()
   }
 
+  setRecordingPaused(paused: boolean): void {
+    this.recordingPaused = paused
+    this.recorder.paused = paused
+    this.publish()
+  }
+
+  clearRecording(): void {
+    this.recorder.clear()
+    this.publish()
+  }
+
+  /** Recorded data for one chart, in uPlot's layout. */
+  chartData = (chart: ChartSpec): ChartData => {
+    const toSeries = (values: Float64Array) => Array.from(values, (v) => (Number.isFinite(v) ? v : null))
+    return [Array.from(this.recorder.times()), ...chart.series.map((s) => toSeries(this.recorder.series(s.key)))]
+  }
+
+  /** All recorded channels as CSV, with units in the headers. */
+  toCsv(): string {
+    return toCsv([
+      { header: 't (s)', values: this.recorder.times() },
+      ...this.definition.channels.map((c) => ({
+        header: c.unit ? `${c.label} (${c.unit})` : c.label,
+        values: this.recorder.series(c.key),
+      })),
+    ])
+  }
+
   setSpeed(speed: number): void {
     this.speed = speed
     this.loop.speed = speed
@@ -127,8 +168,18 @@ export class SimulationController {
   private rebuild(): void {
     const instance = this.definition.create(this.values)
     this.instance = instance
+    const recorder = new TimeSeriesRecorder(
+      this.definition.channels.map((c) => c.key),
+      { interval: this.definition.sampleInterval(this.values), capacity: SAMPLE_CAPACITY },
+    )
+    recorder.paused = this.recordingPaused
+    recorder.sample(0, instance.sample())
+    this.recorder = recorder
     this.loop = new FixedStepLoop({ dt: this.definition.dt }, (_t, dt) => {
-      if (!instance.finished) instance.step(dt)
+      if (instance.finished) return
+      instance.step(dt)
+      // Record on the simulation-time schedule; always record the final state.
+      recorder.sample(instance.time, instance.sample(), instance.finished)
     })
     this.loop.speed = this.speed
     this.fellBehind = false
@@ -177,6 +228,9 @@ export class SimulationController {
       fellBehind: this.running && this.fellBehind,
       readouts: this.instance.readouts(),
       notices: this.instance.notices(),
+      dataVersion: this.recorder.version,
+      sampleCount: this.recorder.length,
+      recordingPaused: this.recordingPaused,
     }
     this.listeners.forEach((listener) => listener())
   }

@@ -51,6 +51,15 @@ function createInstance(values: ParameterValues): SimulationInstance {
       model.step(dt)
       trail.sample(model.time, [model.state[0], model.state[1]])
     },
+    sample() {
+      const [x, y, vx, vy] = model.state
+      const t = model.time
+      const g = params.gravity
+      const v0x = params.speed * Math.cos(angle)
+      const v0y = params.speed * Math.sin(angle)
+      const ke = 0.5 * (vx * vx + vy * vy)
+      return [x, y, vx, vy, v0x * t, params.launchHeight + v0y * t - 0.5 * g * t * t, v0y - g * t, ke, g * y, ke + g * y]
+    },
     readouts() {
       const [x, y, vx, vy] = model.state
       const measured = (value: number | undefined) => value ?? Number.NaN
@@ -149,6 +158,37 @@ function createInstance(values: ParameterValues): SimulationInstance {
 export const projectileSimulation: SimulationDefinition = {
   id: 'projectile-motion',
   dt: 1e-3,
+  sampleInterval: (v) =>
+    Math.max(0.005, dragFreeTheory(num(v, 'speed'), (num(v, 'angleDeg') * Math.PI) / 180, num(v, 'launchHeight'), num(v, 'gravity')).flightTime / 2000),
+  channels: [
+    { key: 'x', label: 'x', unit: 'm' },
+    { key: 'y', label: 'y', unit: 'm' },
+    { key: 'vx', label: 'vₓ', unit: 'm/s' },
+    { key: 'vy', label: 'v_y', unit: 'm/s' },
+    { key: 'xTheory', label: 'x, drag-free theory', unit: 'm' },
+    { key: 'yTheory', label: 'y, drag-free theory', unit: 'm' },
+    { key: 'vyTheory', label: 'v_y, drag-free theory', unit: 'm/s' },
+    { key: 'ke', label: 'Kinetic energy per kg', unit: 'J/kg' },
+    { key: 'pe', label: 'Potential energy per kg', unit: 'J/kg' },
+    { key: 'energy', label: 'Total energy per kg', unit: 'J/kg' },
+  ],
+  charts: [
+    {
+      id: 'position', title: 'Position', unit: 'm',
+      series: [
+        { key: 'x', color: 'position' }, { key: 'y', color: 'momentum' },
+        { key: 'xTheory', color: 'theory', theory: true }, { key: 'yTheory', color: 'theory', theory: true },
+      ],
+    },
+    {
+      id: 'velocity', title: 'Velocity', unit: 'm/s',
+      series: [{ key: 'vx', color: 'velocity' }, { key: 'vy', color: 'momentum' }, { key: 'vyTheory', color: 'theory', theory: true }],
+    },
+    {
+      id: 'energy', title: 'Energy per kg', unit: 'J/kg',
+      series: [{ key: 'ke', color: 'velocity' }, { key: 'pe', color: 'position' }, { key: 'energy', color: 'energy' }],
+    },
+  ],
   canvasDescription: 'Side view of the projectile’s path over metre-gridded ground, with its velocity vector and the drag-free path dashed.',
   parameters: [
     { kind: 'number', key: 'speed', label: 'Launch speed v₀', unit: 'm/s', min: 0.5, max: 100, step: 0.5, defaultValue: 20 },

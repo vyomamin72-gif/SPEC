@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **Phase 3 (first experiments) complete**. Sections marked _(planned)_ describe design
+Status: **MVP complete (Phases 1–4)**. Sections marked _(planned)_ describe design
 decisions that are fixed now but whose code lands in a later phase.
 
 ## 1. Guiding principle
@@ -35,8 +35,8 @@ SPEC/
 │   │   ├── simulations/      One folder per experiment (parameters, readouts,
 │   │   │                     equations, drawing), registry, runtime controller
 │   │   ├── rendering/        Canvas helpers: world↔screen viewport, grid, arrows
-│   │   ├── charts/           uPlot wrapper for live graphs.               (Phase 4)
-│   │   ├── data/             Ring buffers, sim-time sampling. CSV export in Phase 4.
+│   │   ├── charts/           uPlot wrapper for live graphs
+│   │   ├── data/             Ring buffers, sim-time sampling, CSV export
 │   │   ├── components/
 │   │   │   ├── ui/           Design-system primitives
 │   │   │   └── layout/       App shell, workspace three-panel layout
@@ -143,7 +143,7 @@ interacting bodies), where the cost is real. The engine API is designed as
 "state in, state out" so that moving a model into a worker requires no change
 to the model itself.
 
-## 5. Data collection (`data/`, Phase 2) and graphs (Phase 4)
+## 5. Data collection (`data/`) and graphs (`charts/`)
 
 - Each recorded channel is a fixed-capacity ring buffer (`Float64Array`).
   Memory is bounded regardless of run length; the oldest samples are dropped.

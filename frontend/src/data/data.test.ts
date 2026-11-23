@@ -32,6 +32,14 @@ describe('TimeSeriesRecorder', () => {
     expect(counts).toEqual([101, 100])
   })
 
+  it('can force an off-schedule sample (e.g. the final state)', () => {
+    const recorder = new TimeSeriesRecorder(['x'], { interval: 1, capacity: 10 })
+    recorder.sample(0, [0])
+    expect(recorder.sample(0.25, [1])).toBe(false)
+    expect(recorder.sample(0.25, [1], true)).toBe(true)
+    expect(Array.from(recorder.times())).toEqual([0, 0.25])
+  })
+
   it('stores channels in order, bounds memory, pauses and clears', () => {
     const recorder = new TimeSeriesRecorder(['x', 'v'] as const, { interval: 1, capacity: 2 })
     recorder.sample(0, [10, 20])

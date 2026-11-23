@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
@@ -46,7 +47,7 @@ test.describe('pendulum', () => {
     await expect(page.getByTestId('sim-time')).toHaveText('0.003000')
     await page.locator('body').click({ position: { x: 5, y: 5 } })
     await page.keyboard.press('Space')
-    await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible()
     await page.keyboard.press('Space')
     await expect(page.getByRole('button', { name: 'Play' })).toBeVisible()
     await page.keyboard.press('r')
@@ -58,7 +59,7 @@ test.describe('pendulum', () => {
     await page.getByLabel('Simulation speed').selectOption('8')
     await page.getByRole('button', { name: 'Play' }).click()
     await expect(readout(page, 'Periods completed')).not.toHaveText('0', { timeout: 15_000 })
-    await page.getByRole('button', { name: 'Pause' }).click()
+    await page.getByRole('button', { name: 'Pause', exact: true }).click()
     // L = 1 m, θ₀ = 30°: T = 4√(L/g)·K(sin 15°) = 2.041 s
     await expect(readout(page, 'Period (measured)')).toHaveText('2.041 s')
     await expect(readout(page, 'Period (exact theory)')).toHaveText('2.041 s')
@@ -72,7 +73,7 @@ test.describe("Newton's laws", () => {
     await page.getByRole('button', { name: 'Play' }).click()
     await expect(readout(page, 'Friction regime')).toHaveText('kinetic')
     await page.waitForTimeout(500)
-    await page.getByRole('button', { name: 'Pause' }).click()
+    await page.getByRole('button', { name: 'Pause', exact: true }).click()
     const timeBefore = await page.getByTestId('sim-time').textContent()
     // Pausing first makes the check deterministic: the block is still sliding.
     const force = page.getByLabel('Applied force F', { exact: true })
@@ -83,5 +84,39 @@ test.describe("Newton's laws", () => {
     await page.getByRole('button', { name: 'Play' }).click()
     await expect(readout(page, 'Friction regime')).toHaveText('none', { timeout: 10_000 }) // at rest, no force
     await expect(readout(page, 'Measured stopping point')).not.toHaveText('—')
+  })
+})
+
+test.describe('graphs and data', () => {
+  test('charts recorded data; recording pauses, clears and exports to CSV', async ({ page }) => {
+    await page.goto('/lab/pendulum')
+    await expect(page.getByTestId('chart-angle').locator('canvas').first()).toBeVisible()
+    await page.getByLabel('Simulation speed').selectOption('4')
+    await page.getByRole('button', { name: 'Play' }).click()
+    await expect(page.getByTestId('sample-count')).not.toHaveText('1 samples')
+
+    await page.getByRole('button', { name: 'Pause recording' }).click()
+    const frozen = (await page.getByTestId('sample-count').textContent()) ?? ''
+    await page.waitForTimeout(400) // simulation keeps running, recording does not
+    await expect(page.getByTestId('sample-count')).toHaveText(frozen)
+    await page.getByRole('button', { name: 'Pause', exact: true }).click()
+
+    await page.getByRole('button', { name: 'Energy' }).click()
+    await expect(page.getByTestId('chart-energy').locator('canvas').first()).toBeVisible()
+
+    const downloadPromise = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export CSV' }).click()
+    const download = await downloadPromise
+    expect(download.suggestedFilename()).toMatch(/^pendulum-.+\.csv$/)
+    const lines = (await readFile(await download.path(), 'utf8')).trim().split('\n')
+    expect(lines[0]).toMatch(/^t \(s\),θ \(°\),/)
+    expect(lines).toHaveLength(Number.parseInt(frozen, 10) + 1) // header + every recorded sample
+    // First sample: released at θ₀ = 30°. Stored in radians, so 30° → rad → ° carries
+    // one unit of round-off; the CSV exports the exact double rather than hiding it.
+    expect(lines[1].split(',').map(Number)[1]).toBeCloseTo(30, 12)
+
+    await page.getByRole('button', { name: 'Clear' }).click()
+    await expect(page.getByTestId('sample-count')).toHaveText('0 samples')
+    await expect(page.getByRole('button', { name: 'Export CSV' })).toBeDisabled()
   })
 })

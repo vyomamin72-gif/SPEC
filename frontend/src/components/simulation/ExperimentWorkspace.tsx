@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+import { Group, Panel as ResizablePanel, Separator } from 'react-resizable-panels'
 import { Link } from 'react-router'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { TransportBar } from '@/components/layout/TransportBar'
-import { WorkspaceLayout } from '@/components/layout/WorkspaceLayout'
+import { DESKTOP_QUERY, WorkspaceLayout } from '@/components/layout/WorkspaceLayout'
 import { Panel } from '@/components/ui/Panel'
 import { Readout } from '@/components/ui/Readout'
 import { FidelityBadge } from '@/components/ExperimentCard'
 import type { ExperimentInfo } from '@/catalog/types'
 import { SimulationController } from '@/simulations/controller'
 import type { SimulationDefinition } from '@/simulations/types'
+import { GraphPanel } from './GraphPanel'
 import { ParameterList } from './ParameterList'
 
 export const SPEED_OPTIONS = [0.1, 0.25, 0.5, 1, 2, 4, 8] as const
@@ -38,6 +41,16 @@ export function ExperimentWorkspace({ experiment, definition }: { experiment: Ex
   useEffect(() => () => controller.pause(false), [controller])
   useKeyboardShortcuts(controller)
   const canvasRef = useCallback((canvas: HTMLCanvasElement | null) => controller.attachCanvas(canvas), [controller])
+  const isDesktop = useMediaQuery(DESKTOP_QUERY)
+
+  const simulationPanel = (
+    <Panel title="Simulation" className="h-full">
+      <div className="relative h-full min-h-64">
+        <canvas ref={canvasRef} role="img" aria-label={definition.canvasDescription} className="absolute inset-0 size-full rounded" />
+      </div>
+    </Panel>
+  )
+  const graphPanel = <GraphPanel controller={controller} snapshot={snapshot} />
 
   return (
     // lg:flex-none: with flex-1 the zero flex basis would override the fixed height.
@@ -60,19 +73,25 @@ export function ExperimentWorkspace({ experiment, definition }: { experiment: Ex
           </Panel>
         }
         center={
-          <Panel title="Simulation" className="h-full">
-            <div className="relative h-full min-h-64">
-              <canvas
-                ref={canvasRef}
-                role="img"
-                aria-label={definition.canvasDescription}
-                className="absolute inset-0 size-full rounded"
-              />
-            </div>
-          </Panel>
+          isDesktop ? (
+            <Group orientation="vertical" className="h-full">
+              <ResizablePanel id="canvas-view" defaultSize="58%" minSize="25%">
+                {simulationPanel}
+              </ResizablePanel>
+              <Separator className="group flex h-2 items-center justify-center outline-none">
+                <div className="h-0.5 w-10 rounded bg-line transition-colors group-hover:bg-accent group-focus-visible:bg-accent" />
+              </Separator>
+              <ResizablePanel id="graphs" minSize="20%">
+                {graphPanel}
+              </ResizablePanel>
+            </Group>
+          ) : (
+            simulationPanel
+          )
         }
         right={
           <div className="flex h-full min-h-0 flex-col gap-2">
+            {!isDesktop && <div className="h-[30rem]">{graphPanel}</div>}
             <Panel title="Measurements" className="min-h-0 flex-[3]">
               <div className="space-y-4">
                 {snapshot.readouts.map((group) => (

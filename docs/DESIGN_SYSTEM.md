@@ -27,6 +27,10 @@ excluded from production builds.
 | Status | `ok`, `warn`, `danger` | System status, model-fidelity warnings |
 | Quantities | `q-position`, `q-velocity`, `q-acceleration`, `q-force`, `q-energy`, `q-momentum`, `q-theory` | Data series, vectors |
 
+Exception: when one chart shows several components of the same quantity
+(e.g. x and y position), the components need distinct colours; the legend and
+CSV headers name each one.
+
 Quantity colours are the Okabe–Ito palette, chosen to remain distinguishable
 under the most common colour-vision deficiencies. Colour is still never the
 *only* channel: graphs carry legends and vectors carry labels.

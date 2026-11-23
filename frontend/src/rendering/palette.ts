@@ -11,12 +11,13 @@ export interface Palette {
   acceleration: string
   force: string
   energy: string
+  momentum: string
   theory: string
 }
 
 const FALLBACK: Palette = {
   background: '#131922', grid: '#253041', gridLabel: '#7d8a9c', ink: '#e6edf3', muted: '#9aa7b8', line: '#34425a',
-  position: '#56b4e9', velocity: '#009e73', acceleration: '#cc79a7', force: '#e69f00', energy: '#f0e442', theory: '#c9d1d9',
+  position: '#56b4e9', velocity: '#009e73', acceleration: '#cc79a7', force: '#e69f00', energy: '#f0e442', momentum: '#d55e00', theory: '#c9d1d9',
 }
 
 export function readPalette(): Palette {
@@ -35,6 +36,7 @@ export function readPalette(): Palette {
     acceleration: token('q-acceleration', FALLBACK.acceleration),
     force: token('q-force', FALLBACK.force),
     energy: token('q-energy', FALLBACK.energy),
+    momentum: token('q-momentum', FALLBACK.momentum),
     theory: token('q-theory', FALLBACK.theory),
   }
 }

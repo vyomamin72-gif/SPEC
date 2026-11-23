@@ -22,6 +22,21 @@ function readParams(v: ParameterValues): NewtonParams {
   }
 }
 
+/**
+ * Closed-form acceleration for a constant force from rest, written
+ * independently of the model's friction routine so it is a genuine check.
+ */
+function theoryAcceleration(p: Readonly<NewtonParams>, kineticMu: number): number {
+  const normal = p.mass * p.gravity
+  if (p.scenario === 'push') {
+    return Math.abs(p.appliedForce) <= p.staticFriction * normal
+      ? 0
+      : (p.appliedForce - Math.sign(p.appliedForce) * kineticMu * normal) / p.mass
+  }
+  const drive = p.hangingMass * p.gravity
+  return drive <= p.staticFriction * normal ? 0 : (drive - kineticMu * normal) / (p.mass + p.hangingMass)
+}
+
 /** Filled block with a label, drawn from world coordinates of its bottom-left corner. */
 function drawBlock(ctx: CanvasRenderingContext2D, vp: Viewport, x: number, y: number, w: number, h: number, label: string, palette: Palette) {
   ctx.fillStyle = palette.line
@@ -43,6 +58,14 @@ function createInstance(values: ParameterValues): SimulationInstance {
       return model.finished !== null
     },
     step: (dt) => model.step(dt),
+    sample() {
+      const p = model.parameters
+      const f = model.forces()
+      const [x, v] = model.state
+      const t = model.time
+      const xTheory = model.forceConstantSinceStart ? 0.5 * theoryAcceleration(p, model.effectiveKineticFriction) * t * t : Number.NaN
+      return [x, xTheory, v, model.acceleration(), f.pulling, f.friction, f.net, p.mass * v]
+    },
     update(next) {
       model.setAppliedForce(num(next, 'appliedForce'))
     },
@@ -65,8 +88,7 @@ function createInstance(values: ParameterValues): SimulationInstance {
         })
         theory.push({ label: 'Measured stopping point', value: model.lastStopPosition ?? Number.NaN, unit: 'm' })
       } else {
-        const drive = p.hangingMass * p.gravity
-        const aTheory = drive > p.staticFriction * p.mass * p.gravity ? (drive - mukN) / (p.mass + p.hangingMass) : 0
+        const aTheory = theoryAcceleration(p, model.effectiveKineticFriction)
         theory.push({ label: 'Acceleration (theory)', value: aTheory, unit: 'm/s²', description: '(m₂g − μk·m₁g)/(m₁ + m₂), or 0 if static friction holds' })
         theory.push({ label: 'Tension (theory)', value: p.hangingMass * (p.gravity - aTheory), unit: 'N' })
         theory.push({ label: 'Time to floor (theory)', value: aTheory > 0 ? Math.sqrt((2 * DROP_HEIGHT) / aTheory) : Infinity, unit: 's' })
@@ -196,6 +218,27 @@ function createInstance(values: ParameterValues): SimulationInstance {
 export const newtonsLawsSimulation: SimulationDefinition = {
   id: 'newtons-laws',
   dt: 1e-3,
+  sampleInterval: () => 0.01,
+  channels: [
+    { key: 'x', label: 'x', unit: 'm' },
+    { key: 'xTheory', label: 'x, theory ½at² (constant force from rest)', unit: 'm' },
+    { key: 'v', label: 'v', unit: 'm/s' },
+    { key: 'a', label: 'a', unit: 'm/s²' },
+    { key: 'pulling', label: 'Applied force or tension', unit: 'N' },
+    { key: 'friction', label: 'Friction', unit: 'N' },
+    { key: 'net', label: 'Net force on block', unit: 'N' },
+    { key: 'momentum', label: 'Block momentum m₁v', unit: 'kg·m/s' },
+  ],
+  charts: [
+    { id: 'position', title: 'Position', unit: 'm', series: [{ key: 'x', color: 'position' }, { key: 'xTheory', color: 'theory', theory: true }] },
+    { id: 'velocity', title: 'Velocity', unit: 'm/s', series: [{ key: 'v', color: 'velocity' }] },
+    { id: 'acceleration', title: 'Acceleration', unit: 'm/s²', series: [{ key: 'a', color: 'acceleration' }] },
+    {
+      id: 'forces', title: 'Forces', unit: 'N',
+      series: [{ key: 'pulling', color: 'force' }, { key: 'friction', color: 'momentum' }, { key: 'net', color: 'energy' }],
+    },
+    { id: 'momentum', title: 'Momentum', unit: 'kg·m/s', series: [{ key: 'momentum', color: 'momentum' }] },
+  ],
   canvasDescription: 'A block with its free-body diagram: applied or tension force, friction, normal force and weight, drawn to scale.',
   parameters: [
     {

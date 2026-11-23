@@ -4,10 +4,25 @@ An interactive physics simulation platform. Every simulation will be driven by
 numerical integration of its equations of motion, not by animation formulas,
 and every result is compared against theory where theory exists.
 
-> **Status: Phase 3 complete. Three experiments are runnable:** projectile
-> motion (with optional quadratic drag), the pendulum (nonlinear or small-angle,
-> selectable integrator) and Newton's laws (push with friction, pulley).
-> Live graphs and CSV export are Phase 4.
+> **Status: MVP complete (Phases 1–4).** Three experiments are runnable —
+> projectile motion (optional quadratic drag), the pendulum (nonlinear or
+> small-angle, selectable integrator) and Newton's laws (push with friction,
+> pulley) — with live graphs, analytic theory curves and CSV export.
+
+## Using a laboratory
+
+1. Open an **Available** experiment from the dashboard.
+2. Set parameters on the left (slider, or type an exact value and press Enter).
+   Changing a parameter restarts the run, except those marked as changeable
+   while running.
+3. **Play / Pause / Step / Reset** in the bottom bar (keyboard: Space, →, R).
+   Speed changes how fast simulated time passes, never the timestep.
+4. Read measurements on the right: each simulated result sits next to its
+   theoretical value, with model notes and equations below.
+5. Graphs under the canvas plot recorded data (solid) against analytic theory
+   (dashed, blank where no closed form applies). Pause recording, clear it, or
+   **Export CSV** — every recorded channel at full double precision, units in
+   the headers. Up to 5000 samples per channel are kept; older ones are dropped.
 > See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Documentation
@@ -91,7 +106,7 @@ The same checks run in GitHub Actions (`.github/workflows/ci.yml`).
 ## Known limitations (current)
 
 - Only 3 of 25 experiments are implemented; the rest are labelled "Planned".
-- No live graphs or CSV export yet (Phase 4). Measurements are shown as numbers.
+- CSV files contain the recorded data only, not the parameters that produced them.
 - Keyboard shortcuts in a lab: Space play/pause, R reset, → single step.
 - Tables are created with `create_all`. Alembic migrations must be added
   before the first schema change once real data exists.

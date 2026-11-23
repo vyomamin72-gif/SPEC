@@ -35,6 +35,27 @@ export function dampedLinearPeriod(length: number, gravity: number, dampingRate:
   return wd2 > 0 ? (2 * Math.PI) / Math.sqrt(wd2) : Number.NaN
 }
 
+/**
+ * Exact solution of the linear (small-angle) model θ'' + γθ' + ω₀²θ = 0,
+ * released from rest at θ₀: under-, critically and over-damped cases.
+ */
+export function linearSolution(t: number, theta0: number, omega0Squared: number, gamma: number): number {
+  const half = gamma / 2
+  const disc = omega0Squared - half * half
+  const scale = 1e-12 * Math.max(omega0Squared, half * half)
+  if (disc > scale) {
+    const wd = Math.sqrt(disc)
+    return theta0 * Math.exp(-half * t) * (Math.cos(wd * t) + (half / wd) * Math.sin(wd * t))
+  }
+  if (disc < -scale) {
+    const root = Math.sqrt(-disc)
+    const s1 = -half + root
+    const s2 = -half - root
+    return (theta0 / (s1 - s2)) * (s1 * Math.exp(s2 * t) - s2 * Math.exp(s1 * t))
+  }
+  return theta0 * Math.exp(-half * t) * (1 + half * t)
+}
+
 function pendulumSystem(p: PendulumParams): MechanicalSystem {
   const g = p.gravity / p.length
   const gamma = p.dampingCoefficient / p.mass

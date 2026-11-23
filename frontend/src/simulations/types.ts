@@ -1,5 +1,7 @@
 import type { Palette } from '@/rendering/palette'
 
+export type SeriesColor = Exclude<keyof Palette, 'background' | 'grid' | 'gridLabel' | 'ink' | 'line'>
+
 export type ParameterValue = number | boolean | string
 export type ParameterValues = Record<string, ParameterValue>
 
@@ -56,6 +58,21 @@ export interface Equation {
   expression: string
 }
 
+/** A recorded quantity. Every channel is recorded and exported to CSV. */
+export interface ChannelSpec {
+  key: string
+  label: string
+  unit: string
+}
+
+export interface ChartSpec {
+  id: string
+  title: string
+  /** Unit shared by every series on the y axis. */
+  unit: string
+  series: readonly { key: string; color: SeriesColor; /** analytic curve: drawn dashed */ theory?: boolean }[]
+}
+
 /** One running experiment: owns the physical state, renders it and reports measurements. */
 export interface SimulationInstance {
   /** Simulated time in seconds (authoritative; stops when the experiment ends). */
@@ -66,6 +83,8 @@ export interface SimulationInstance {
   readouts(): ReadoutGroup[]
   notices(): string[]
   render(ctx: CanvasRenderingContext2D, width: number, height: number, palette: Palette): void
+  /** Current values of the definition's channels, in the same order. NaN where a value does not apply. */
+  sample(): number[]
   /** Apply parameters marked `live` without resetting. */
   update?(values: ParameterValues): void
 }
@@ -76,6 +95,10 @@ export interface SimulationDefinition {
   dt: number
   parameters: readonly ParameterSpec[]
   equations: readonly Equation[]
+  channels: readonly ChannelSpec[]
+  charts: readonly ChartSpec[]
+  /** Simulation-time interval between recorded samples, s. */
+  sampleInterval(values: ParameterValues): number
   /** Text alternative for the canvas. */
   canvasDescription: string
   create(values: ParameterValues): SimulationInstance

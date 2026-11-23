@@ -33,9 +33,11 @@ export class TimeSeriesRecorder<Channel extends string> {
    * the next multiple of the interval (computed from an integer index, so the
    * schedule never drifts). `values` follows the order of `channels`.
    */
-  sample(t: number, values: ArrayLike<number>): boolean {
+  sample(t: number, values: ArrayLike<number>, force = false): boolean {
+    if (this.paused) return false
     // Tolerance absorbs rounding in t = steps × dt (e.g. 3 × 0.1 ≠ 0.3).
-    if (this.paused || t < this.nextSampleIndex * this.interval - 1e-9 * this.interval) return false
+    // `force` records off-schedule, e.g. the exact final state when a run ends.
+    if (!force && t < this.nextSampleIndex * this.interval - 1e-9 * this.interval) return false
     if (values.length !== this.channels.length) throw new RangeError('values must match channels')
     this.time.push(t)
     this.channels.forEach((channel, i) => this.buffers.get(channel)?.push(values[i]))

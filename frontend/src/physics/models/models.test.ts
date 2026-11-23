@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import projectileFixture from '../__fixtures__/projectile-quadratic-drag.json'
 import { advanceExact, DROP_HEIGHT, NewtonModel, TRACK_HALF_LENGTH } from './newton'
 import type { NewtonParams } from './newton'
-import { dampedLinearPeriod, exactPeriod, PendulumModel, smallAnglePeriod } from './pendulum'
+import { dampedLinearPeriod, exactPeriod, linearSolution, PendulumModel, smallAnglePeriod } from './pendulum'
 import type { PendulumParams } from './pendulum'
 import { dragFreeTheory, ProjectileModel } from './projectile'
 import type { ProjectileParams } from './projectile'
@@ -101,6 +101,22 @@ describe('PendulumModel', () => {
     const p = pendulum({ model: 'linear', amplitudeDeg: 20, dampingCoefficient: 0.4, mass: 2 })
     const model = runFor(new PendulumModel(p), 8)
     expect(Math.abs(model.measuredPeriod / dampedLinearPeriod(1, G, 0.2) - 1)).toBeLessThan(1e-8)
+  })
+
+  it.each([
+    ['underdamped', 0.4],
+    ['overdamped', 30],
+  ])('linear model trajectory equals the exact solution (%s)', (_name, b) => {
+    // Validates the theory curve shown in the graph: RK4 on the linear model
+    // must reproduce linearSolution to integrator accuracy (~1e-11).
+    const p = pendulum({ model: 'linear', amplitudeDeg: 10, dampingCoefficient: b })
+    const model = new PendulumModel(p)
+    let maxError = 0
+    for (let i = 1; i <= 5000; i++) {
+      model.step(DT)
+      maxError = Math.max(maxError, Math.abs(model.state[0] - linearSolution(i * DT, (10 * Math.PI) / 180, G, b)))
+    }
+    expect(maxError).toBeLessThan(1e-9)
   })
 
   it('mass has no effect without damping', () => {
