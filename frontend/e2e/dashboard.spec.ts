@@ -14,17 +14,17 @@ test.describe('dashboard', () => {
     ]) {
       await expect(page.getByRole('heading', { level: 2, name: module })).toBeVisible()
     }
-    await expect(page.getByTestId('availability-summary')).toHaveText(/^0 of \d+ experiments available\.$/)
-    await expect(page.getByRole('note')).toContainText('No simulation is runnable yet')
+    await expect(page.getByTestId('availability-summary')).toHaveText(/^3 of \d+ experiments available\.$/)
+    await expect(page.getByText('Available', { exact: true })).toHaveCount(3)
   })
 
-  test('opens an experiment page that states its model and status', async ({ page }) => {
+  test('opens a planned experiment page that states its model and status', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('link', { name: /^Pendulum/ }).click()
-    await expect(page).toHaveURL(/\/lab\/pendulum$/)
-    await expect(page.getByRole('heading', { level: 1, name: 'Pendulum' })).toBeVisible()
+    await page.getByRole('link', { name: /^Solar System/ }).click()
+    await expect(page).toHaveURL(/\/lab\/solar-system$/)
+    await expect(page.getByRole('heading', { level: 1, name: 'Solar System' })).toBeVisible()
     await expect(page.getByRole('note')).toContainText('not implemented yet')
-    await expect(page.getByText(/massless rigid rod/)).toBeVisible()
+    await expect(page.getByText(/approximate mean orbital elements/)).toBeVisible()
     await page.getByRole('link', { name: '← All laboratories' }).click()
     await expect(page).toHaveURL(/\/$/)
   })

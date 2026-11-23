@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { EXPERIMENTS, findExperiment } from './experiments'
 import { MODULES, getModule } from './modules'
+import { SIMULATIONS } from '@/simulations/registry'
 
 describe('experiment catalog', () => {
   it('has unique, URL-safe ids', () => {
@@ -22,10 +23,9 @@ describe('experiment catalog', () => {
     }
   })
 
-  it('does not mark anything available before its simulation exists (Phase 1)', () => {
-    // When the first simulation lands, replace this with a check that every
-    // available experiment has a registered simulation implementation.
-    expect(EXPERIMENTS.filter((e) => e.availability.status === 'available')).toEqual([])
+  it('marks an experiment available if and only if its simulation is implemented', () => {
+    const available = EXPERIMENTS.filter((e) => e.availability.status === 'available').map((e) => e.id)
+    expect(available.sort()).toEqual(Object.keys(SIMULATIONS).sort())
   })
 
   it('looks up experiments and modules by id', () => {

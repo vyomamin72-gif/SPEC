@@ -1,5 +1,6 @@
 import type { ExperimentInfo } from './types'
 
+const available = { status: 'available' } as const
 const phase3 = { status: 'planned', phase: 'Phase 3' } as const
 const phase5 = { status: 'planned', phase: 'Phase 5' } as const
 const later = { status: 'planned', phase: 'After MVP' } as const
@@ -20,7 +21,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Uniform gravity over flat, non-rotating ground. Optional drag uses a constant coefficient; spin (Magnus force) and wind are not modelled.',
-    availability: phase3,
+    availability: available,
   },
   {
     id: 'newtons-laws',
@@ -30,7 +31,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Rigid blocks, Coulomb friction with distinct static and kinetic coefficients, ideal massless string and frictionless pulley.',
-    availability: phase3,
+    availability: available,
   },
   {
     id: 'pendulum',
@@ -40,7 +41,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Point mass on a massless rigid rod in uniform gravity. Damping is a linear drag force on the bob. Large amplitudes are handled exactly by the nonlinear mode.',
-    availability: phase3,
+    availability: available,
   },
   {
     id: 'collisions',

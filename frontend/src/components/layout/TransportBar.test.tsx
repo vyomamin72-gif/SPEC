@@ -27,7 +27,7 @@ describe('TransportBar', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Play' }))
     await userEvent.click(screen.getByRole('button', { name: 'Step' }))
     await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
-    await userEvent.selectOptions(screen.getByLabelText('Speed'), '4')
+    await userEvent.selectOptions(screen.getByLabelText('Simulation speed'), '4')
     expect(props.onPlayPause).toHaveBeenCalledOnce()
     expect(props.onStep).toHaveBeenCalledOnce()
     expect(props.onReset).toHaveBeenCalledOnce()

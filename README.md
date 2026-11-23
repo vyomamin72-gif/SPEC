@@ -4,10 +4,10 @@ An interactive physics simulation platform. Every simulation will be driven by
 numerical integration of its equations of motion, not by animation formulas,
 and every result is compared against theory where theory exists.
 
-> **Status: Phase 2 (physics engine) complete. No experiment is runnable in the UI yet.**
-> The tested engine (integrators, fixed-step loop, event location, data
-> recording, SciPy reference fixtures) exists; the first experiments that use
-> it are Phase 3.
+> **Status: Phase 3 complete. Three experiments are runnable:** projectile
+> motion (with optional quadratic drag), the pendulum (nonlinear or small-angle,
+> selectable integrator) and Newton's laws (push with friction, pulley).
+> Live graphs and CSV export are Phase 4.
 > See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Documentation
@@ -90,7 +90,9 @@ The same checks run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Known limitations (current)
 
-- No experiment UI yet. Every experiment is labelled "Planned".
+- Only 3 of 25 experiments are implemented; the rest are labelled "Planned".
+- No live graphs or CSV export yet (Phase 4). Measurements are shown as numbers.
+- Keyboard shortcuts in a lab: Space play/pause, R reset, → single step.
 - Tables are created with `create_all`. Alembic migrations must be added
   before the first schema change once real data exists.
 - There is no authentication. Do not expose the backend publicly.

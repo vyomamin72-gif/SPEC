@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **Phase 2 (physics engine) complete**. Sections marked _(planned)_ describe design
+Status: **Phase 3 (first experiments) complete**. Sections marked _(planned)_ describe design
 decisions that are fixed now but whose code lands in a later phase.
 
 ## 1. Guiding principle
@@ -32,9 +32,9 @@ SPEC/
 │   │   │   ├── core/         Integrators, fixed-step loop, event location
 │   │   │   ├── analysis/     Analytic reference functions (elliptic K, …)
 │   │   │   └── __fixtures__/ SciPy golden trajectories (generated)
-│   │   ├── simulations/      One folder per experiment: model binding,
-│   │   │                     parameter schema, renderer, educational text. (Phase 3)
-│   │   ├── rendering/        Canvas helpers: world↔screen transform, arrows. (Phase 4)
+│   │   ├── simulations/      One folder per experiment (parameters, readouts,
+│   │   │                     equations, drawing), registry, runtime controller
+│   │   ├── rendering/        Canvas helpers: world↔screen viewport, grid, arrows
 │   │   ├── charts/           uPlot wrapper for live graphs.               (Phase 4)
 │   │   ├── data/             Ring buffers, sim-time sampling. CSV export in Phase 4.
 │   │   ├── components/
@@ -107,6 +107,19 @@ Consequences, deliberately chosen:
 - **No spiral of death.** If the machine cannot keep up, the simulation slows
   down and *says so* in the UI, instead of silently increasing `dt`.
 - **Step button** advances exactly one `dt` (or a fixed number of steps).
+
+### Runtime controller (`simulations/controller.ts`)
+
+A plain TypeScript class runs each experiment: it owns the model instance,
+the `FixedStepLoop`, the `requestAnimationFrame` loop and canvas drawing.
+React reads it through `useSyncExternalStore`, and the controller publishes a
+snapshot (time, readouts, notices) at most every 100 ms while running. Physics
+and drawing run at full rate without React re-rendering 60 times a second, and
+the controller is unit-tested without a browser.
+
+Parameter changes rebuild the experiment from its initial conditions, except
+parameters marked `live` (e.g. the applied force in Newton's laws), which are
+applied to the running instance.
 
 ### Why simulation state is not in Zustand
 

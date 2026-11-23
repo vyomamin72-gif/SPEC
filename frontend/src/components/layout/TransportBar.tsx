@@ -15,6 +15,8 @@ export interface TransportBarProps {
   onSpeedChange: (speed: number) => void
   /** True when the simulation cannot keep up with the requested speed. */
   isFallingBehind?: boolean
+  /** The experiment has ended (e.g. landed); Play then restarts it. */
+  isFinished?: boolean
 }
 
 export function TransportBar({
@@ -27,6 +29,7 @@ export function TransportBar({
   onStep,
   onSpeedChange,
   isFallingBehind = false,
+  isFinished = false,
 }: TransportBarProps) {
   return (
     <div
@@ -35,9 +38,9 @@ export function TransportBar({
       className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2"
     >
       <Button variant="primary" onClick={onPlayPause} aria-pressed={isRunning} className="w-20">
-        {isRunning ? 'Pause' : 'Play'}
+        {isRunning ? 'Pause' : isFinished ? 'Replay' : 'Play'}
       </Button>
-      <Button onClick={onStep} disabled={isRunning} title="Advance one timestep (available while paused)">
+      <Button onClick={onStep} disabled={isRunning || isFinished} title="Advance one timestep (available while paused)">
         Step
       </Button>
       <Button onClick={onReset}>Reset</Button>
@@ -45,6 +48,7 @@ export function TransportBar({
       <label className="ml-2 flex items-center gap-2 text-muted">
         Speed
         <select
+          aria-label="Simulation speed"
           value={speed}
           onChange={(event) => onSpeedChange(Number(event.target.value))}
           className="numeric h-8 rounded border border-line-strong bg-base px-2 text-ink"
@@ -58,6 +62,7 @@ export function TransportBar({
       </label>
 
       <div className="ml-auto flex items-center gap-3">
+        {isFinished && <span className="text-xs text-ok">Run complete</span>}
         {isFallingBehind && (
           <span className="text-xs text-warn" role="status">
             Running slower than requested

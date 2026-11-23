@@ -2,6 +2,8 @@ import { Link, useParams } from 'react-router'
 import { AvailabilityBadge, FidelityBadge } from '@/components/ExperimentCard'
 import { findExperiment } from '@/catalog/experiments'
 import { FIDELITY_LABELS, getModule } from '@/catalog/modules'
+import { ExperimentWorkspace } from '@/components/simulation/ExperimentWorkspace'
+import { SIMULATIONS } from '@/simulations/registry'
 import { NotFoundPage } from './NotFoundPage'
 
 /**
@@ -12,6 +14,11 @@ export function ExperimentPage() {
   const { experimentId = '' } = useParams()
   const experiment = findExperiment(experimentId)
   if (!experiment) return <NotFoundPage />
+  const definition = SIMULATIONS[experiment.id]
+  if (definition && experiment.availability.status === 'available') {
+    // key: a fresh controller per experiment when navigating between labs
+    return <ExperimentWorkspace key={experiment.id} experiment={experiment} definition={definition} />
+  }
 
   const module = getModule(experiment.module)
   const fidelity = FIDELITY_LABELS[experiment.fidelity]
