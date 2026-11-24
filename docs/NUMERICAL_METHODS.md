@@ -297,3 +297,31 @@ bit-identical state.
 `backend/scripts/generate_fixtures.py` writes the reference trajectories to
 `frontend/src/physics/__fixtures__/`. A backend test fails if the committed
 files no longer match the generator, so the two sides cannot silently diverge.
+
+## 9. Phase 5 — what each new lab is validated against
+
+| Lab | Method | Verified in tests |
+|---|---|---|
+| Collisions | Event-driven, exact contact times | Momentum to 1e-12; ΔK = ½μ(1−e²)Δv²; contact at the exact time |
+| Circular motion | RK4 on θ (exact for constant force), free flight after cut | T = mω²r; ω = ω₀ + αt; tangential escape |
+| Gravity, solar system | Velocity Verlet, optional Plummer softening | Return after one Kepler period (1e-5); energy bounded over 100 orbits; L and p to 1e-12; planetary periods vs Kepler III and observed periods (0.3 %) |
+| SHM, resonance | RK4 | Exact driven-damped solution (1e-9); settled amplitude vs resonance curve (1e-4) |
+| Waves, standing waves, sound | Leapfrog finite differences | Exact d'Alembert at C = 1 (1e-12); mode frequency vs grid dispersion (1e-5); fixed/free reflection signs; absorbing boundary < 1 %; unstable above CFL; sound wavelength (1 %) and pressure amplitude (2 %) |
+| Interference | Analytic superposition | Fringe spacing → λD/d in the far field; minimum on axis for Δφ = π |
+| Charges | N-body with Coulomb coupling, RK4 | Speed from energy conservation (1e-9) |
+| Electric field | Superposition, RK4 field lines | kq/r²; Gauss's law flux = q/ε₀ (1e-5); dipole lines end on −q |
+| Magnetic field | Biot–Savart (long wires), Boris pusher | μ₀I/2πr; cyclotron radius and period (1e-5); speed to 1e-13; E×B drift (1e-3) |
+| Induction | Exact dipole flux through a coaxial loop | dΦ/dx vs finite difference; EMF peak at x = a/2; ∫ε dt = 0 over a pass |
+| DC circuits | Modified nodal analysis; backward Euler for RC | Series/parallel formulas; Kirchhoff residuals ~1e-17; power balance; balanced bridge; first-order convergence |
+| Gas kinetics | Time-stepped hard-disk MD with cell lists | Energy to 1e-12; Maxwell–Boltzmann mean speed (2 %); pressure vs Henderson EOS (3 %, statistical) |
+| Heat conduction | FTCS | Exact discrete mode decay (1e-12); continuum within O(Δx²); steady state; unstable above r = ½ |
+
+Two lessons from building them, recorded because they are easy to get wrong:
+
+- **Leapfrog/Boris velocities sit half a step from positions.** Starting a
+  Boris orbit with v(0) shifts the circle's centre by about r·ωΔt/2; the
+  radius is still right. Measure from the orbit, not an assumed centre.
+- **Sharp starts ring on a grid.** A piston switched on abruptly makes a kink
+  that a finite-difference grid cannot represent; numerical dispersion turns
+  it into high-frequency ripples that corrupted the measured wavelength by
+  16 %. The sound lab ramps the piston smoothly over three cycles.

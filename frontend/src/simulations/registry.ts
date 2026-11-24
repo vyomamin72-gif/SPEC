@@ -6,6 +6,8 @@ import { inductionSimulation } from './electromagnetic-induction'
 import { dcCircuitsSimulation } from './dc-circuits'
 import { collisionsSimulation } from './collisions'
 import { gravitySimulation } from './gravity-n-body'
+import { idealGasSimulation } from './ideal-gas'
+import { heatTransferSimulation } from './heat-transfer'
 import { solarSystemSimulation } from './solar-system'
 import { simpleHarmonicSimulation } from './simple-harmonic-motion'
 import { resonanceSimulation } from './resonance'
@@ -39,5 +41,7 @@ export const SIMULATIONS: Readonly<Record<string, SimulationDefinition>> = Objec
     magneticFieldSimulation,
     inductionSimulation,
     dcCircuitsSimulation,
+    idealGasSimulation,
+    heatTransferSimulation,
   ].map((s) => [s.id, s]),
 )

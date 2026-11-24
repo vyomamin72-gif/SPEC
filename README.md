@@ -4,10 +4,10 @@ An interactive physics simulation platform. Every simulation will be driven by
 numerical integration of its equations of motion, not by animation formulas,
 and every result is compared against theory where theory exists.
 
-> **Status: MVP complete (Phases 1–4).** Three experiments are runnable —
-> projectile motion (optional quadratic drag), the pendulum (nonlinear or
-> small-angle, selectable integrator) and Newton's laws (push with friction,
-> pulley) — with live graphs, analytic theory curves and CSV export.
+> **Status: Phase 5 complete.** 20 of 25 laboratories are runnable across
+> mechanics, gravitation, waves, electricity and magnetism, and
+> thermodynamics, each with live graphs, theory comparison and CSV export.
+> The five advanced-topic labs (relativity, quantum) are still planned.
 
 ## Using a laboratory
 
@@ -105,7 +105,10 @@ The same checks run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Known limitations (current)
 
-- Only 3 of 25 experiments are implemented; the rest are labelled "Planned".
+- The five advanced-topic labs (relativity, double slit, quantum probability,
+  photoelectric effect) are not implemented yet and are labelled "Planned".
+- The solar system is a 2D canvas view (orbits projected onto the ecliptic),
+  not a Three.js 3D scene.
 - CSV files contain the recorded data only, not the parameters that produced them.
 - Keyboard shortcuts in a lab: Space play/pause, R reset, → single step.
 - Tables are created with `create_all`. Alembic migrations must be added

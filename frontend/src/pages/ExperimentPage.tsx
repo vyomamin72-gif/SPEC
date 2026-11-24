@@ -1,9 +1,12 @@
+import { Suspense, use } from 'react'
 import { Link, useParams } from 'react-router'
 import { AvailabilityBadge, FidelityBadge } from '@/components/ExperimentCard'
 import { findExperiment } from '@/catalog/experiments'
 import { FIDELITY_LABELS, getModule } from '@/catalog/modules'
 import { ExperimentWorkspace } from '@/components/simulation/ExperimentWorkspace'
-import { SIMULATIONS } from '@/simulations/registry'
+import { loadSimulation } from '@/simulations/loaders'
+import type { SimulationDefinition } from '@/simulations/types'
+import type { ExperimentInfo } from '@/catalog/types'
 import { NotFoundPage } from './NotFoundPage'
 
 /**
@@ -14,10 +17,14 @@ export function ExperimentPage() {
   const { experimentId = '' } = useParams()
   const experiment = findExperiment(experimentId)
   if (!experiment) return <NotFoundPage />
-  const definition = SIMULATIONS[experiment.id]
+  const definition = loadSimulation(experiment.id)
   if (definition && experiment.availability.status === 'available') {
-    // key: a fresh controller per experiment when navigating between labs
-    return <ExperimentWorkspace key={experiment.id} experiment={experiment} definition={definition} />
+    return (
+      <Suspense fallback={<p className="p-8 text-muted">Loading the laboratory…</p>}>
+        {/* key: a fresh controller per experiment when navigating between labs */}
+        <LoadedWorkspace key={experiment.id} experiment={experiment} definition={definition} />
+      </Suspense>
+    )
   }
 
   const module = getModule(experiment.module)
@@ -54,4 +61,8 @@ export function ExperimentPage() {
       </section>
     </div>
   )
+}
+
+function LoadedWorkspace({ experiment, definition }: { experiment: ExperimentInfo; definition: Promise<SimulationDefinition> }) {
+  return <ExperimentWorkspace experiment={experiment} definition={use(definition)} />
 }

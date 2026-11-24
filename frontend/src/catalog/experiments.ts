@@ -1,7 +1,6 @@
 import type { ExperimentInfo } from './types'
 
 const available = { status: 'available' } as const
-const phase5 = { status: 'planned', phase: 'Phase 5' } as const
 const later = { status: 'planned', phase: 'After MVP' } as const
 
 /**
@@ -197,7 +196,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Two-dimensional hard-disk molecular dynamics — a real Newtonian simulation of a 2D analogue gas. It departs from the ideal-gas law at high density, and the lab shows by how much.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'heat-transfer',
@@ -206,7 +205,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Temperature profiles evolving along a rod with fixed-temperature ends.',
     fidelity: 'numerical',
     modelNotes: 'One-dimensional heat equation (Fourier’s law) with constant material properties.',
-    availability: phase5,
+    availability: available,
   },
 
   // ── Module F: Advanced experiments ────────────────────────────────────

@@ -38,7 +38,7 @@ it exists from Phase 1), collisions lab (Phase 3 stretch), all of Modules B–F,
 | 3 First experiments ✅ (collisions deferred) | Projectile, pendulum, Newton's laws (collisions as stretch) | Each experiment's analytic tests pass; parameters drive the model |
 | 4 Visualization ✅ | Canvas renderer with world↔screen camera, vectors, free-body diagrams, uPlot live graphs, CSV export | Graphs plot recorded data; CSV round-trip test |
 | — **MVP release** ✅ | Phases 1–4 + README | Definition of Done checklist all verified |
-| 5 Advanced labs | Gravity/orbits (worker), waves, E&M, thermodynamics, circular motion, collisions 2D | Per-module validation tests from NUMERICAL_METHODS.md |
+| 5 Advanced labs ✅ | Gravity/orbits (worker), waves, E&M, thermodynamics, circular motion, collisions 2D | Per-module validation tests from NUMERICAL_METHODS.md |
 | 6 Education | Background, variables, guided mode, challenges with deferred answers, theory comparison panels | Content reviewed against references |
 | 7 QA | Performance profiling, accessibility audit (keyboard, contrast, screen-reader labels), bug fixing | Documented profiling numbers, axe checks pass |
 | 8 Finalization | README, deployment, known limitations | Fresh-clone install verified |
@@ -64,3 +64,21 @@ it exists from Phase 1), collisions lab (Phase 3 stretch), all of Modules B–F,
 | 14 | Bleeding-edge toolchain (TS 7, Vite 8) incompatibilities | Broken tooling | Pinned TS 5.9.3 (typescript-eslint requires < 6.1); exact versions in lockfile |
 | 15 | `create_all` cannot migrate schema | Data loss on schema change | Introduce Alembic before the first schema change once real data exists |
 | 16 | Simplified models presented as reality | Scientific dishonesty | Every catalog entry carries a fidelity label and model notes |
+
+## Phase 5 decisions
+
+- **Shared engines.** One N-body engine serves gravity, the solar system and
+  Coulomb charges; one oscillator serves SHM and resonance; one wave-string
+  solver serves propagation, standing waves and sound.
+- **No Three.js.** The solar system is drawn in 2D on a canvas, with orbits
+  projected onto the ecliptic. A 3D scene would add a large dependency for
+  no gain in the physics shown; revisit if inclinations are added.
+- **No Web Workers yet.** The heaviest lab (400 hard disks) costs well under
+  a millisecond per step on the main thread. Workers remain the plan if a
+  lab needs thousands of bodies.
+- **Simulation clock.** Each lab declares how simulated time is shown and
+  paced (days, ms, ps …); physics stays in SI seconds.
+- **Static configurations** (field maps, resistor networks) disable play
+  and step and say why, instead of offering a button that does nothing.
+- **Code splitting.** Each laboratory is a separate chunk (4–12 kB),
+  loaded when opened.

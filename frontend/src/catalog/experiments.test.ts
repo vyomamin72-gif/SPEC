@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { EXPERIMENTS, findExperiment } from './experiments'
 import { MODULES, getModule } from './modules'
+import { SIMULATION_LOADERS } from '@/simulations/loaders'
 import { SIMULATIONS } from '@/simulations/registry'
 
 describe('experiment catalog', () => {
@@ -26,6 +27,7 @@ describe('experiment catalog', () => {
   it('marks an experiment available if and only if its simulation is implemented', () => {
     const available = EXPERIMENTS.filter((e) => e.availability.status === 'available').map((e) => e.id)
     expect(available.sort()).toEqual(Object.keys(SIMULATIONS).sort())
+    expect(Object.keys(SIMULATION_LOADERS).sort()).toEqual(Object.keys(SIMULATIONS).sort())
   })
 
   it('looks up experiments and modules by id', () => {

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **MVP complete (Phases 1–4)**. Sections marked _(planned)_ describe design
+Status: **Phase 5 complete** (20 of 25 laboratories). Sections marked _(planned)_ describe design
 decisions that are fixed now but whose code lands in a later phase.
 
 ## 1. Guiding principle
