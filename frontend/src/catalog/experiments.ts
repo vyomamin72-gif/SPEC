@@ -1,7 +1,6 @@
 import type { ExperimentInfo } from './types'
 
 const available = { status: 'available' } as const
-const phase3 = { status: 'planned', phase: 'Phase 3' } as const
 const phase5 = { status: 'planned', phase: 'Phase 5' } as const
 const later = { status: 'planned', phase: 'After MVP' } as const
 
@@ -51,7 +50,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'One-dimensional frictionless track. Collisions are instantaneous and described by a coefficient of restitution; contact deformation is not modelled.',
-    availability: phase3,
+    availability: available,
   },
   {
     id: 'circular-motion',
@@ -60,7 +59,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Relate angular velocity, radius, centripetal acceleration and the tension needed to keep a body on a circle.',
     fidelity: 'numerical',
     modelNotes: 'Point mass on an ideal inextensible tether on a frictionless horizontal plane.',
-    availability: phase5,
+    availability: available,
   },
 
   // ── Module B: Gravity and orbital mechanics ───────────────────────────

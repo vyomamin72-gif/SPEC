@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test'
+import { EXPERIMENTS } from '../src/catalog/experiments'
+
+const AVAILABLE = EXPERIMENTS.filter((e) => e.availability.status === 'available').length
 
 test.describe('dashboard', () => {
   test('lists every module and reports honest availability', async ({ page }) => {
@@ -14,8 +17,8 @@ test.describe('dashboard', () => {
     ]) {
       await expect(page.getByRole('heading', { level: 2, name: module })).toBeVisible()
     }
-    await expect(page.getByTestId('availability-summary')).toHaveText(/^3 of \d+ experiments available\.$/)
-    await expect(page.getByText('Available', { exact: true })).toHaveCount(3)
+    await expect(page.getByTestId('availability-summary')).toHaveText(`${AVAILABLE} of ${EXPERIMENTS.length} experiments available.`)
+    await expect(page.getByText('Available', { exact: true })).toHaveCount(AVAILABLE)
   })
 
   test('opens a planned experiment page that states its model and status', async ({ page }) => {

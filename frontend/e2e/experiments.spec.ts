@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { EXPERIMENTS } from '../src/catalog/experiments'
 
 const readout = (page: Page, label: string) => page.getByTestId(`readout-${label}`).locator('dd')
 
@@ -118,5 +119,47 @@ test.describe('graphs and data', () => {
     await page.getByRole('button', { name: 'Clear' }).click()
     await expect(page.getByTestId('sample-count')).toHaveText('0 samples')
     await expect(page.getByRole('button', { name: 'Export CSV' })).toBeDisabled()
+  })
+})
+
+test.describe('every available laboratory', () => {
+  for (const experiment of EXPERIMENTS.filter((e) => e.availability.status === 'available')) {
+    test(`${experiment.id} opens, runs and reports measurements without errors`, async ({ page }) => {
+      const errors: string[] = []
+      page.on('pageerror', (e) => errors.push(e.message))
+      page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
+      // No backend runs during e2e; stub its health check so only real app errors remain.
+      await page.route('**/api/health', (route) => route.fulfill({ json: { status: 'ok', version: 'test', database: 'ok' } }))
+      await page.goto(`/lab/${experiment.id}`)
+      await expect(page.getByRole('heading', { level: 1, name: experiment.title })).toBeVisible()
+      await page.getByRole('button', { name: 'Play' }).click()
+      await page.waitForTimeout(600)
+      await expect(page.getByTestId('sim-time')).not.toHaveText('0.000')
+      expect(errors).toEqual([])
+    })
+  }
+})
+
+test.describe('collisions', () => {
+  test('conserves total momentum through the collision', async ({ page }) => {
+    await page.goto('/lab/collisions')
+    await page.getByLabel('Simulation speed').selectOption('4')
+    await page.getByRole('button', { name: 'Play' }).click()
+    await expect(page.getByText('Run complete')).toBeVisible({ timeout: 15_000 })
+    // m₁ = 1 kg at 2 m/s, m₂ = 3 kg at −1 m/s: p = −1 kg·m/s; elastic → v₁′ = −2.5, v₂′ = 0.5 m/s
+    await expect(readout(page, 'Total momentum (now)')).toHaveText('\u22121.000\u00a0kg·m/s')
+    await expect(readout(page, 'Left body after (simulated)')).toHaveText('\u22122.500\u00a0m/s')
+    await expect(readout(page, 'Right body after (theory)')).toHaveText('0.5000\u00a0m/s')
+  })
+})
+
+test.describe('circular motion', () => {
+  test('tension is mω²r and cutting the tether removes it', async ({ page }) => {
+    await page.goto('/lab/circular-motion')
+    await expect(readout(page, 'Tension T = mω²r')).toHaveText('4.000\u00a0N') // 0.5 · 2² · 2
+    await page.getByRole('button', { name: 'Play' }).click()
+    await page.getByLabel('Cut the tether').check()
+    await expect(readout(page, 'Tension T = mω²r')).toHaveText('0.000\u00a0N')
+    await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible() // live: not reset
   })
 })
