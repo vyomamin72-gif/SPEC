@@ -92,7 +92,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'A mass on an ideal spring compared against its exact sinusoidal solution.',
     fidelity: 'numerical',
     modelNotes: 'Ideal massless linear spring obeying Hooke’s law; optional linear damping.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'wave-propagation',
@@ -101,7 +101,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Pulses and wave trains travelling along a string, with reflection at fixed and free ends.',
     fidelity: 'numerical',
     modelNotes: 'Linear wave equation on a discretised string, valid for small transverse displacements.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'standing-waves',
@@ -110,7 +110,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Excite normal modes of a string and compare their frequencies with fₙ = n·v / 2L.',
     fidelity: 'numerical',
     modelNotes: 'Linear wave equation, uniform string, ideal fixed boundaries.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'interference',
@@ -119,7 +119,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Two-source interference with adjustable wavelength, separation and phase difference.',
     fidelity: 'analytic',
     modelNotes: 'Exact superposition of ideal point sources of linear waves; amplitude decay with distance is optional.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'sound-waves',
@@ -128,7 +128,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Visualise air-parcel displacement and pressure in a longitudinal sound wave.',
     fidelity: 'simplified',
     modelNotes: 'Linear one-dimensional acoustics in a uniform medium; no attenuation or nonlinear effects.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'resonance',
@@ -137,7 +137,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Drive a damped oscillator and map amplitude and phase against driving frequency.',
     fidelity: 'numerical',
     modelNotes: 'Linear damped driven oscillator with sinusoidal forcing.',
-    availability: phase5,
+    availability: available,
   },
 
   // ── Module D: Electricity and magnetism ───────────────────────────────

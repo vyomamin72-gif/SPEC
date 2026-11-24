@@ -74,6 +74,17 @@ describe('SimulationController', () => {
     expect(xTheory.at(-1)).toBeNull()
   })
 
+  it('sound lab: once the tube is filled, measured wavelength and pressure amplitude match theory', () => {
+    const c = new SimulationController(SIMULATIONS['sound-waves'])
+    // Fill time: L/c (5.8 ms) + ramp (6 ms) + two periods (4 ms) ≈ 16 ms.
+    while (c.getSnapshot().time < 0.02) for (let i = 0; i < 100; i++) c.step()
+    const wavelength = readout(c, 'Wavelength (measured from pressure)')?.value ?? NaN
+    expect(Math.abs(wavelength / (343 / 500) - 1)).toBeLessThan(0.01)
+    const pMax = readout(c, 'Largest pressure in the tube now')?.value ?? NaN
+    const pTheory = readout(c, 'Pressure amplitude ρcωs₀ (travelling wave)')?.value ?? NaN
+    expect(Math.abs(pMax / pTheory - 1)).toBeLessThan(0.02)
+  })
+
   it('every chart series refers to a declared channel', () => {
     for (const d of Object.values(SIMULATIONS)) {
       const keys = new Set(d.channels.map((ch) => ch.key))
