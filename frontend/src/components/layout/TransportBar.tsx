@@ -17,6 +17,10 @@ export interface TransportBarProps {
   isFallingBehind?: boolean
   /** The experiment has ended (e.g. landed); Play then restarts it. */
   isFinished?: boolean
+  /** Unit of `simTime` (default seconds). */
+  timeUnit?: string
+  /** Explains what 1× means when it is not one second per second, e.g. "1× = 1 day/s". */
+  rateNote?: string
 }
 
 export function TransportBar({
@@ -30,6 +34,8 @@ export function TransportBar({
   onSpeedChange,
   isFallingBehind = false,
   isFinished = false,
+  timeUnit = 's',
+  rateNote,
 }: TransportBarProps) {
   return (
     <div
@@ -60,6 +66,7 @@ export function TransportBar({
           ))}
         </select>
       </label>
+      {rateNote && <span className="text-xs text-faint">{rateNote}</span>}
 
       <div className="ml-auto flex items-center gap-3">
         {isFinished && <span className="text-xs text-ok">Run complete</span>}
@@ -75,7 +82,7 @@ export function TransportBar({
           <span data-testid="sim-time" className="numeric text-ink">
             {formatScalar(simTime, { sigFigs: 4 })}
           </span>{' '}
-          s
+          {timeUnit}
         </span>
       </div>
     </div>

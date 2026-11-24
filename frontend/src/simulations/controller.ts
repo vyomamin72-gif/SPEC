@@ -3,8 +3,8 @@ import { TimeSeriesRecorder } from '@/data/TimeSeriesRecorder'
 import { FixedStepLoop } from '@/physics/core/loop'
 import { readPalette } from '@/rendering/palette'
 import type { Palette } from '@/rendering/palette'
-import { defaultValues } from './types'
-import type { ChartSpec, ParameterValue, ParameterValues, ReadoutGroup, SimulationDefinition, SimulationInstance } from './types'
+import { defaultValues, SECONDS_CLOCK } from './types'
+import type { ChartSpec, ParameterValue, ParameterValues, ReadoutGroup, SimulationClock, SimulationDefinition, SimulationInstance } from './types'
 
 export interface ControllerSnapshot {
   values: ParameterValues
@@ -19,6 +19,7 @@ export interface ControllerSnapshot {
   dataVersion: number
   sampleCount: number
   recordingPaused: boolean
+  clock: SimulationClock
 }
 
 const PUBLISH_INTERVAL_MS = 100
@@ -53,6 +54,7 @@ export class SimulationController {
   private snapshot!: ControllerSnapshot
   private recorder!: TimeSeriesRecorder<string>
   private recordingPaused = false
+  private clock: SimulationClock = SECONDS_CLOCK
 
   constructor(definition: SimulationDefinition, values: ParameterValues = defaultValues(definition)) {
     this.definition = definition
@@ -144,7 +146,8 @@ export class SimulationController {
   /** Recorded data for one chart, in uPlot's layout. */
   chartData = (chart: ChartSpec): ChartData => {
     const toSeries = (values: Float64Array) => Array.from(values, (v) => (Number.isFinite(v) ? v : null))
-    return [Array.from(this.recorder.times()), ...chart.series.map((s) => toSeries(this.recorder.series(s.key)))]
+    const scale = this.clock.secondsPerUnit
+    return [Array.from(this.recorder.times(), (t) => t / scale), ...chart.series.map((s) => toSeries(this.recorder.series(s.key)))]
   }
 
   /** All recorded channels as CSV, with units in the headers. */
@@ -160,8 +163,12 @@ export class SimulationController {
 
   setSpeed(speed: number): void {
     this.speed = speed
-    this.loop.speed = speed
+    this.loop.speed = this.simulatedSecondsPerRealSecond()
     this.publish()
+  }
+
+  private simulatedSecondsPerRealSecond(): number {
+    return this.speed * this.clock.secondsPerUnit * this.clock.unitsPerRealSecond
   }
 
   // ── Internals ─────────────────────────────────────────────────────────
@@ -175,13 +182,15 @@ export class SimulationController {
     recorder.paused = this.recordingPaused
     recorder.sample(0, instance.sample())
     this.recorder = recorder
-    this.loop = new FixedStepLoop({ dt: this.definition.dt }, (_t, dt) => {
+    this.clock = this.definition.clock?.(this.values) ?? SECONDS_CLOCK
+    const dt = this.definition.timestep?.(this.values) ?? this.definition.dt
+    this.loop = new FixedStepLoop({ dt }, (_t, dt) => {
       if (instance.finished) return
       instance.step(dt)
       // Record on the simulation-time schedule; always record the final state.
       recorder.sample(instance.time, instance.sample(), instance.finished)
     })
-    this.loop.speed = this.speed
+    this.loop.speed = this.simulatedSecondsPerRealSecond()
     this.fellBehind = false
     this.draw()
     this.publish()
@@ -231,6 +240,7 @@ export class SimulationController {
       dataVersion: this.recorder.version,
       sampleCount: this.recorder.length,
       recordingPaused: this.recordingPaused,
+      clock: this.clock,
     }
     this.listeners.forEach((listener) => listener())
   }

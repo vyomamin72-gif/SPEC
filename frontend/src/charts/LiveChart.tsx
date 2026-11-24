@@ -13,6 +13,7 @@ export interface LiveChartProps {
   getData: (chart: ChartSpec) => ChartData
   /** Changes whenever new data should be drawn. */
   dataVersion: number
+  timeUnit?: string
 }
 
 const AXIS_FONT = '11px "IBM Plex Sans", system-ui, sans-serif'
@@ -22,7 +23,7 @@ const formatValue = (_u: uPlot, v: number | null) => (v == null ? '—' : format
  * Canvas-based time-series chart (uPlot). Created once per chart spec and fed
  * new data when `dataVersion` changes; React never re-renders the plot itself.
  */
-export function LiveChart({ chart, channels, getData, dataVersion }: LiveChartProps) {
+export function LiveChart({ chart, channels, getData, dataVersion, timeUnit = 's' }: LiveChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<uPlot | null>(null)
 
@@ -43,7 +44,7 @@ export function LiveChart({ chart, channels, getData, dataVersion }: LiveChartPr
       height: 160,
       scales: { x: { time: false } },
       series: [
-        { label: 't (s)', value: formatValue },
+        { label: `t (${timeUnit})`, value: formatValue },
         ...chart.series.map((s) => ({
           label: label(s.key),
           stroke: palette[s.color],
@@ -54,7 +55,7 @@ export function LiveChart({ chart, channels, getData, dataVersion }: LiveChartPr
         })),
       ],
       axes: [
-        { ...axis, label: 'Time (s)' },
+        { ...axis, label: `Time (${timeUnit})` },
         { ...axis, label: chart.unit, size: 56 },
       ],
       legend: { live: true },
@@ -77,7 +78,7 @@ export function LiveChart({ chart, channels, getData, dataVersion }: LiveChartPr
       plot.destroy()
       plotRef.current = null
     }
-  }, [chart, channels, getData])
+  }, [chart, channels, getData, timeUnit])
 
   useEffect(() => {
     plotRef.current?.setData(getData(chart) as uPlot.AlignedData)

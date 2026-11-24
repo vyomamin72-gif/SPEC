@@ -71,7 +71,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Newtonian point masses. Forces are softened below a small length to avoid numerical singularities; this softening is not a property of nature.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'solar-system',
@@ -81,7 +81,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Newtonian N-body from approximate mean orbital elements. No general relativity, moons or asteroids, so it drifts from real ephemerides over long times.',
-    availability: phase5,
+    availability: available,
   },
 
   // ── Module C: Waves and oscillations ──────────────────────────────────

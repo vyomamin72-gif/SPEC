@@ -130,7 +130,9 @@ export function ExperimentWorkspace({ experiment, definition }: { experiment: Ex
         bottom={
           <TransportBar
             isRunning={snapshot.isRunning}
-            simTime={snapshot.time}
+            simTime={snapshot.time / snapshot.clock.secondsPerUnit}
+            timeUnit={snapshot.clock.unit}
+            rateNote={snapshot.clock.unit === 's' && snapshot.clock.unitsPerRealSecond === 1 ? undefined : `1× = ${snapshot.clock.unitsPerRealSecond} ${snapshot.clock.unit}/s`}
             speed={snapshot.speed}
             speedOptions={SPEED_OPTIONS}
             isFallingBehind={snapshot.fellBehind}

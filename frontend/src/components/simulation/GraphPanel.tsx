@@ -55,7 +55,7 @@ export function GraphPanel({ controller, snapshot }: { controller: SimulationCon
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-hidden">
-          {chart && <LiveChart key={chart.id} chart={chart} channels={channels} getData={controller.chartData} dataVersion={snapshot.dataVersion} />}
+          {chart && <LiveChart key={chart.id} chart={chart} channels={channels} getData={controller.chartData} dataVersion={snapshot.dataVersion} timeUnit={snapshot.clock.unit} />}
         </div>
         <p className="text-xs text-faint">Solid: simulation. Dashed: analytic theory (blank where it does not apply).</p>
       </div>

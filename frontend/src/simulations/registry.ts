@@ -1,5 +1,7 @@
 import { circularMotionSimulation } from './circular-motion'
 import { collisionsSimulation } from './collisions'
+import { gravitySimulation } from './gravity-n-body'
+import { solarSystemSimulation } from './solar-system'
 import { newtonsLawsSimulation } from './newtons-laws'
 import { pendulumSimulation } from './pendulum'
 import { projectileSimulation } from './projectile'
@@ -13,5 +15,7 @@ export const SIMULATIONS: Readonly<Record<string, SimulationDefinition>> = Objec
     newtonsLawsSimulation,
     collisionsSimulation,
     circularMotionSimulation,
+    gravitySimulation,
+    solarSystemSimulation,
   ].map((s) => [s.id, s]),
 )

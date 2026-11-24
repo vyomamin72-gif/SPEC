@@ -89,10 +89,27 @@ export interface SimulationInstance {
   update?(values: ParameterValues): void
 }
 
+/**
+ * How simulated time is shown and paced. The physics always runs in SI
+ * seconds; an orbit lasting weeks is shown in days and played at, e.g.,
+ * one day per real second at 1× speed.
+ */
+export interface SimulationClock {
+  unit: string
+  secondsPerUnit: number
+  /** Display units of simulated time per real second at 1× speed. */
+  unitsPerRealSecond: number
+}
+
+export const SECONDS_CLOCK: SimulationClock = { unit: 's', secondsPerUnit: 1, unitsPerRealSecond: 1 }
+
 export interface SimulationDefinition {
   id: string
-  /** Fixed physics timestep, s. */
+  /** Fixed physics timestep, s (overridden by `timestep` when given). */
   dt: number
+  /** Timestep that depends on the parameters (e.g. on the orbital scale), s. */
+  timestep?(values: ParameterValues): number
+  clock?(values: ParameterValues): SimulationClock
   parameters: readonly ParameterSpec[]
   equations: readonly Equation[]
   channels: readonly ChannelSpec[]
