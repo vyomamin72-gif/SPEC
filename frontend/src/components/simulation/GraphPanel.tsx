@@ -55,7 +55,11 @@ export function GraphPanel({ controller, snapshot }: { controller: SimulationCon
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-hidden">
-          {chart && <LiveChart key={chart.id} chart={chart} channels={channels} getData={controller.chartData} dataVersion={snapshot.dataVersion} timeUnit={snapshot.clock.unit} />}
+          {snapshot.isStatic && snapshot.sampleCount <= 1 ? (
+            <p className="flex h-full items-center justify-center text-center text-sm text-faint">
+              Nothing changes over time in this configuration, so there is nothing to plot. Use the measurements panel.
+            </p>
+          ) : chart && <LiveChart key={chart.id} chart={chart} channels={channels} getData={controller.chartData} dataVersion={snapshot.dataVersion} timeUnit={snapshot.clock.unit} />}
         </div>
         <p className="text-xs text-faint">Solid: simulation. Dashed: analytic theory (blank where it does not apply).</p>
       </div>

@@ -20,6 +20,7 @@ export interface ControllerSnapshot {
   sampleCount: number
   recordingPaused: boolean
   clock: SimulationClock
+  isStatic: boolean
 }
 
 const PUBLISH_INTERVAL_MS = 100
@@ -90,6 +91,7 @@ export class SimulationController {
     this.values = { ...this.values, [key]: value }
     if (spec.live && this.instance.update) {
       this.instance.update(this.values)
+      if (this.instance.isStatic && this.running) this.pause(false)
     } else {
       this.pause(false)
       this.rebuild()
@@ -100,7 +102,7 @@ export class SimulationController {
   }
 
   play(): void {
-    if (this.running || this.instance.finished) return
+    if (this.running || this.instance.finished || this.instance.isStatic) return
     this.running = true
     this.lastFrame = null
     this.frameId = requestAnimationFrame(this.tick)
@@ -121,7 +123,7 @@ export class SimulationController {
 
   /** One fixed timestep. Ignored while running. */
   step(): void {
-    if (this.running || this.instance.finished) return
+    if (this.running || this.instance.finished || this.instance.isStatic) return
     this.loop.stepOnce()
     this.draw()
     this.publish()
@@ -241,6 +243,7 @@ export class SimulationController {
       sampleCount: this.recorder.length,
       recordingPaused: this.recordingPaused,
       clock: this.clock,
+      isStatic: this.instance.isStatic ?? false,
     }
     this.listeners.forEach((listener) => listener())
   }

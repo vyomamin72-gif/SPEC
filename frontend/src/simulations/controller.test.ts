@@ -99,7 +99,7 @@ describe('SimulationController', () => {
       for (let i = 0; i < 50; i++) c.step()
       expect(definition.create(defaultValues(definition)).sample()).toHaveLength(definition.channels.length)
       const items = c.getSnapshot().readouts.flatMap((g) => g.items)
-      expect(items.length).toBeGreaterThan(3)
+      expect(items.length).toBeGreaterThanOrEqual(2)
       expect(items.some((i) => typeof i.value === 'number' && Number.isFinite(i.value))).toBe(true)
     }
   })

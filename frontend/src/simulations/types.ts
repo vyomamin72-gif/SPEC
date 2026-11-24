@@ -79,6 +79,8 @@ export interface SimulationInstance {
   readonly time: number
   /** True when the experiment has reached its end (e.g. the projectile landed). */
   readonly finished: boolean
+  /** Nothing evolves in time in the current configuration (e.g. a static field map). */
+  readonly isStatic?: boolean
   step(dt: number): void
   readouts(): ReadoutGroup[]
   notices(): string[]

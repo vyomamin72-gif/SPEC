@@ -149,7 +149,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     fidelity: 'numerical',
     modelNotes:
       'Non-relativistic point charges: magnetic interaction and radiation are neglected. Forces are softened at very short range.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'electric-field',
@@ -158,7 +158,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Field vectors and field lines for arrangements of static charges.',
     fidelity: 'analytic',
     modelNotes: 'Superposition of static point-charge fields; field lines are traced numerically.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'magnetic-field',
@@ -167,7 +167,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Fields of straight wires and current loops.',
     fidelity: 'analytic',
     modelNotes: 'Steady currents in thin conductors (Biot–Savart law).',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'electromagnetic-induction',
@@ -176,7 +176,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Move a magnet through a coil and observe the induced EMF from the changing flux.',
     fidelity: 'simplified',
     modelNotes: 'Faraday’s law for a magnetic dipole and a coil. The coil’s self-inductance and the force on the magnet are neglected.',
-    availability: phase5,
+    availability: available,
   },
   {
     id: 'dc-circuits',
@@ -185,7 +185,7 @@ export const EXPERIMENTS: readonly ExperimentInfo[] = [
     summary: 'Build series and parallel resistor circuits and measure voltage and current.',
     fidelity: 'numerical',
     modelNotes: 'Lumped ideal components (sources, resistors, wires) solved by nodal analysis.',
-    availability: phase5,
+    availability: available,
   },
 
   // ── Module E: Thermodynamics ──────────────────────────────────────────

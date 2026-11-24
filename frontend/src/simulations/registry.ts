@@ -1,4 +1,9 @@
 import { circularMotionSimulation } from './circular-motion'
+import { coulombSimulation } from './coulomb-interactions'
+import { electricFieldSimulation } from './electric-field'
+import { magneticFieldSimulation } from './magnetic-field'
+import { inductionSimulation } from './electromagnetic-induction'
+import { dcCircuitsSimulation } from './dc-circuits'
 import { collisionsSimulation } from './collisions'
 import { gravitySimulation } from './gravity-n-body'
 import { solarSystemSimulation } from './solar-system'
@@ -29,5 +34,10 @@ export const SIMULATIONS: Readonly<Record<string, SimulationDefinition>> = Objec
     standingWavesSimulation,
     soundWavesSimulation,
     interferenceSimulation,
+    coulombSimulation,
+    electricFieldSimulation,
+    magneticFieldSimulation,
+    inductionSimulation,
+    dcCircuitsSimulation,
   ].map((s) => [s.id, s]),
 )

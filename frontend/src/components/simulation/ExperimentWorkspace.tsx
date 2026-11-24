@@ -141,6 +141,7 @@ export function ExperimentWorkspace({ experiment, definition }: { experiment: Ex
             onStep={() => controller.step()}
             onSpeedChange={(s) => controller.setSpeed(s)}
             isFinished={snapshot.finished}
+            isStatic={snapshot.isStatic}
           />
         }
       />

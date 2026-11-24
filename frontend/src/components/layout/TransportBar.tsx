@@ -21,6 +21,8 @@ export interface TransportBarProps {
   timeUnit?: string
   /** Explains what 1× means when it is not one second per second, e.g. "1× = 1 day/s". */
   rateNote?: string
+  /** Nothing evolves in time: play and step are disabled with an explanation. */
+  isStatic?: boolean
 }
 
 export function TransportBar({
@@ -36,6 +38,7 @@ export function TransportBar({
   isFinished = false,
   timeUnit = 's',
   rateNote,
+  isStatic = false,
 }: TransportBarProps) {
   return (
     <div
@@ -43,10 +46,10 @@ export function TransportBar({
       aria-label="Simulation controls"
       className="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2"
     >
-      <Button variant="primary" onClick={onPlayPause} aria-pressed={isRunning} className="w-20">
+      <Button variant="primary" onClick={onPlayPause} aria-pressed={isRunning} className="w-20" disabled={isStatic}>
         {isRunning ? 'Pause' : isFinished ? 'Replay' : 'Play'}
       </Button>
-      <Button onClick={onStep} disabled={isRunning || isFinished} title="Advance one timestep (available while paused)">
+      <Button onClick={onStep} disabled={isRunning || isFinished || isStatic} title="Advance one timestep (available while paused)">
         Step
       </Button>
       <Button onClick={onReset}>Reset</Button>
@@ -69,6 +72,7 @@ export function TransportBar({
       {rateNote && <span className="text-xs text-faint">{rateNote}</span>}
 
       <div className="ml-auto flex items-center gap-3">
+        {isStatic && <span className="text-xs text-muted">Static: nothing changes over time in this configuration</span>}
         {isFinished && <span className="text-xs text-ok">Run complete</span>}
         {isFallingBehind && (
           <span className="text-xs text-warn" role="status">

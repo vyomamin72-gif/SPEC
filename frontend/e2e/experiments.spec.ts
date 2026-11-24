@@ -132,9 +132,16 @@ test.describe('every available laboratory', () => {
       await page.route('**/api/health', (route) => route.fulfill({ json: { status: 'ok', version: 'test', database: 'ok' } }))
       await page.goto(`/lab/${experiment.id}`)
       await expect(page.getByRole('heading', { level: 1, name: experiment.title })).toBeVisible()
-      await page.getByRole('button', { name: 'Play' }).click()
-      await page.waitForTimeout(600)
-      await expect(page.getByTestId('sim-time')).not.toHaveText('0.000')
+      await expect(page.locator('[data-testid^="readout-"]').first()).toBeVisible()
+      const play = page.getByRole('button', { name: 'Play' })
+      if (await play.isEnabled()) {
+        await play.click()
+        await page.waitForTimeout(600)
+        await expect(page.getByTestId('sim-time')).not.toHaveText('0.000')
+      } else {
+        // Static configuration (a field map, a resistor network): it must say so.
+        await expect(page.getByText('Static: nothing changes over time')).toBeVisible()
+      }
       expect(errors).toEqual([])
     })
   }
