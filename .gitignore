@@ -1,0 +1,26 @@
+# Dependencies and build output
+node_modules/
+dist/
+dist-static/
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Test artefacts
+frontend/playwright-report/
+frontend/test-results/
+frontend/node_modules/.tmp/
+
+# Local databases and environment
+*.db
+*.db-journal
+.env
+.env.*
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

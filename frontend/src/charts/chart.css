@@ -1,0 +1,18 @@
+/* uPlot legend and cursor styled for the dark theme. */
+.live-chart .u-legend {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted);
+  text-align: left;
+}
+.live-chart .u-legend th {
+  font-weight: 400;
+}
+.live-chart .u-legend .u-value {
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+.live-chart .u-cursor-x,
+.live-chart .u-cursor-y {
+  border-color: var(--color-line-strong) !important;
+}

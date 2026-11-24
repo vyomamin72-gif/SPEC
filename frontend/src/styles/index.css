@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/*
+ * Design tokens. See docs/DESIGN_SYSTEM.md for usage rules.
+ * Tailwind v4 turns each --color-* / --font-* token into utilities
+ * (e.g. --color-surface → bg-surface, text-surface, border-surface).
+ * `static` emits every token as a CSS variable even if no utility uses it:
+ * canvas renderers and charts read the --color-q-* tokens at runtime.
+ */
+@theme static {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Surfaces: darkest (canvas) to lightest (raised controls). */
+  --color-canvas: #07090d;
+  --color-base: #0d1117;
+  --color-surface: #131922;
+  --color-raised: #1a2230;
+  --color-line: #253041;
+  --color-line-strong: #34425a;
+
+  /* Text. WCAG contrast on base / raised (computed): ink 16.0 / 13.5, muted 7.7 / 6.5,
+     faint 5.4 / 4.6. All meet AA (4.5:1) on every surface. */
+  --color-ink: #e6edf3;
+  --color-muted: #9aa7b8;
+  --color-faint: #7d8a9c;
+
+  /* Interface accent (interactive elements only — never data). */
+  --color-accent: #4cc2ff;
+  --color-accent-strong: #8ad8ff;
+  --color-accent-ink: #041018;
+
+  /* Status. */
+  --color-ok: #3fb68b;
+  --color-warn: #e0a43a;
+  --color-danger: #f0626a;
+
+  /*
+   * Data series: Okabe–Ito palette, chosen to stay distinguishable for the
+   * most common colour-vision deficiencies. Physical quantities keep the same
+   * colour across every experiment, graph and vector overlay.
+   */
+  --color-q-position: #56b4e9;
+  --color-q-velocity: #009e73;
+  --color-q-acceleration: #cc79a7;
+  --color-q-force: #e69f00;
+  --color-q-energy: #f0e442;
+  --color-q-momentum: #d55e00;
+  /* Theoretical / analytic curves are always drawn dashed in this neutral. */
+  --color-q-theory: #c9d1d9;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-canvas);
+  }
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Numeric readouts: tabular figures stop digits jittering while values change. */
+@utility numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
